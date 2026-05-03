@@ -1,1 +1,2 @@
 # tedit
+The Tiny EDITor
