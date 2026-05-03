@@ -10,7 +10,6 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("src/root.zig"),
         .target = target,
     });
-
     const modteditexe = b.createModule(.{
         .root_source_file = b.path("src/main.zig"),
         .target = target,
@@ -21,34 +20,55 @@ pub fn build(b: *std.Build) void {
             .{ .name = "tedit", .module = mod },
         },
     });
+    const modcpp = b.createModule(.{
+        .target = target,
+        .optimize = optimize,
+        .link_libc = false,
+        .link_libcpp = false,
+    });
 
-    const cppfile = comptime .{
+    const cppfiles = comptime .{
         .{ "src/", "cppmain.cpp" },
     };
+    const cppflags = comptime [_][]const u8{
+        "-std=c++23",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Wshadow",
+        "-Wconversion",
+        "-Werror",
+    };
 
-    inline for (cppfile) |file| {
+    inline for (cppfiles) |file| {
         const dir_str: []const u8, const file_name: []const u8 = file;
         const full_path_str = dir_str ++ file_name;
         const json_fragment_name = file_name ++ ".json.tmp";
 
         const full_path = b.path(full_path_str);
 
-        modteditexe.addCSourceFile(.{
+        const jsonflags = comptime [_][]const u8{ "-MJ", json_fragment_name };
+        const fullflags = cppflags ++ jsonflags;
+        modcpp.addCSourceFile(.{
             .file = full_path,
-            .flags = &.{
-                "-MJ",
-                json_fragment_name,
-                "-std=c++23",
-                "-Wall",
-                "-Wextra",
-                "-Wpedantic",
-                "-Wshadow",
-                "-Wconversion",
-                "-Werror",
-            },
+            .flags = &fullflags,
             .language = .cpp,
         });
     }
+
+    const libtedit = b.addLibrary(.{
+        .linkage = .static,
+        .root_module = mod,
+        .name = "tedit",
+    });
+    const libcpp = b.addLibrary(.{
+        .name = "teditcpp",
+        .root_module = modcpp,
+        .linkage = .static,
+    });
+
+    modteditexe.linkLibrary(libcpp);
+    modcpp.linkLibrary(libtedit);
 
     // Here we define an executable. An executable needs to have a root module
     // which needs to expose a `main` function. While we could add a main function
@@ -70,6 +90,10 @@ pub fn build(b: *std.Build) void {
         .name = "tedit",
         .root_module = modteditexe,
     });
+
+    if (optimize != .Debug) {
+        libcpp.lto = .full;
+    }
 
     // This declares intent for the executable to be installed into the
     // install prefix when running `zig build` (i.e. when executing the default
