@@ -3,10 +3,17 @@
 #ifndef SRC_LIBTEDIT_HPP_
 #define SRC_LIBTEDIT_HPP_
 
-extern "C" {
-void enter_cooked_mode();
+namespace tedit {
 
-void enter_raw_mode();
+extern "C" {
+void enter_cooked_mode() noexcept;
+
+void enter_raw_mode() noexcept;
+
+unsigned char read_char() noexcept;
+
+void print_char(unsigned char) noexcept;
 }
+}  // namespace tedit
 
 #endif  // SRC_LIBTEDIT_HPP_
