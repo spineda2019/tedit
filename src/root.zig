@@ -30,3 +30,9 @@ export fn print_char(char: u8) void {
         @panic(@errorName(err));
     };
 }
+
+export fn clear_screen() void {
+    platform.clear_screen() catch |err| {
+        @panic(@errorName(err));
+    };
+}

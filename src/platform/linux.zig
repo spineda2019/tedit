@@ -51,3 +51,10 @@ pub fn print(char: u8) Error!void {
         return Error.WriteFailure;
     }
 }
+
+pub fn clear_screen() Error!void {
+    const clear_ctrl_code: []const u8 = comptime "\x1b[2J";
+    if (linux.write(stdout, clear_ctrl_code.ptr, clear_ctrl_code.len) != clear_ctrl_code.len) {
+        return Error.WriteFailure;
+    }
+}
