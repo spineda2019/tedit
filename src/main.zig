@@ -23,6 +23,7 @@ pub fn main(init: std.process.Init) ProgramError!void {
     }
 
     const path: [*:0]const u8 = switch (arg_list.items.len) {
+        0 => comptime "",
         1 => arg_list.items[0],
         else => return Error.BadArgCount,
     };

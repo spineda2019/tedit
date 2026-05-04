@@ -1,10 +1,16 @@
 // Copyright 2026 Sebastian Pineda
 
-#include "./libtedit.hpp"
+#include "include/CStringView.hpp"
+#include "include/FileHandle.hpp"
+#include "include/libtedit.hpp"
+#include "include/types.hpp"
 
-extern "C" void cppmain(const unsigned char* const path) {
-    //
-    (void)path;
+extern "C" void cppmain(const unsigned char* const path, tedit::size_t len) {
+    const tedit::CStringView full_path{path, len};
+    const tedit::FileHandle<tedit::file::OwningType::NonOwning> screen{
+        tedit::file::SpecialFile::StdOut};
+    const tedit::FileHandle<tedit::file::OwningType::Owning> fod{full_path};
+
     tedit::enter_raw_mode();
     unsigned char ch{};
     while (ch != 'q') {

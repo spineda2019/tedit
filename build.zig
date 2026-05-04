@@ -1,7 +1,7 @@
 const std = @import("std");
 const builtin = @import("builtin");
 
-pub fn build(b: *std.Build) void {
+pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
     const install_step = b.getInstallStep();
@@ -26,9 +26,27 @@ pub fn build(b: *std.Build) void {
         .link_libc = false,
         .link_libcpp = false,
     });
+    switch (target.result.os.tag) {
+        .linux, .macos, .openbsd, .freebsd => {
+            modcpp.addCMacro("TEDIT_POSIX", "");
+        },
+        .windows => {
+            modcpp.addCMacro("TEDIT_WIN32", "");
+        },
+        else => |other| {
+            var init: [27]u8 = comptime .{0} ** 27;
+            @memcpy(&init, "Unsupported OS (for now?): ");
+
+            var buf: std.ArrayList(u8) = .initBuffer(&init);
+            try buf.appendSlice(b.allocator, @tagName(other));
+
+            @panic(buf.items);
+        },
+    }
 
     const cppfiles = comptime .{
         .{ "src/", "cppmain.cpp" },
+        .{ "src/", "CStringView.cpp" },
     };
     const cppflags = comptime [_][]const u8{
         "-std=c++23",
