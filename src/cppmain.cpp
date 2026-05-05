@@ -23,7 +23,7 @@ extern "C" void cppmain(const unsigned char* const path,
                 tedit::clear_screen();
                 break;
             default:
-                tedit::print_char(ch);
+                output << ch;
                 break;
         }
     }

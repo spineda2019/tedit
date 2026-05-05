@@ -45,6 +45,36 @@ struct FileHandle<fs::FileHandleType::Handle> final {
     using type = void*;
 };
 
+namespace reference {
+template <class T>
+struct RemoveReference final {
+    using type = T;
+};
+
+template <class T>
+struct RemoveReference<T&> final {
+    using type = T;
+};
+
+template <class T>
+struct RemoveReference<T&&> final {
+    using type = T;
+};
+
+template <class T>
+using remove_reference_t = typename RemoveReference<T>::type;
+
+template <class T>
+constexpr T&& forward(remove_reference_t<T>& any) {
+    return static_cast<T&&>(any);
+}
+
+template <class T>
+constexpr T&& forward(remove_reference_t<T>&& any) {
+    return static_cast<T&&>(any);
+}
+}  // namespace reference
+
 }  // namespace tedit::meta
 
 #endif  // SRC_INCLUDE_META_HPP_

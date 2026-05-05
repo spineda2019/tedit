@@ -10,6 +10,8 @@ var starting_state: linux.termios = undefined;
 const stdin: linux.fd_t = linux.STDIN_FILENO;
 const stdout: linux.fd_t = linux.STDOUT_FILENO;
 
+pub const file_handle_t = linux.fd_t;
+
 const Error = error{
     GetAttrFailed,
     SetAttrFailed,
@@ -46,8 +48,8 @@ pub fn read() Error!u8 {
     }
 }
 
-pub fn print(char: u8) Error!void {
-    if (linux.write(stdout, &.{char}, 1) != 1) {
+pub fn write(file: file_handle_t, char: u8) Error!void {
+    if (linux.write(file, &.{char}, 1) != 1) {
         return Error.WriteFailure;
     }
 }

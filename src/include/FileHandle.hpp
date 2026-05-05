@@ -2,7 +2,9 @@
 #define SRC_INCLUDE_FILEHANDLE_HPP_
 
 #include "./CStringView.hpp"
+#include "./libtedit.hpp"
 #include "./types.hpp"
+#include "meta.hpp"
 
 namespace tedit {
 namespace file {
@@ -27,6 +29,14 @@ class FileHandle final {
     void write() {
         //
         (void)file_handle_;
+    }
+
+    /// `auto&&` here is a forwarding reference, NOT an rvalue
+    template <class Self>
+    auto&& operator<<(this Self&& self, unsigned char letter) {
+        // DEDUCING THIS LFGGGGGGG
+        tedit::write_char(self.file_handle_, letter);
+        return tedit::meta::reference::forward<Self>(self);
     }
 
  private:

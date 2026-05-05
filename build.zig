@@ -31,6 +31,7 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
         .optimize = optimize,
         .link_libc = false,
         .link_libcpp = false,
+        .strip = (optimize != .Debug),
     });
     switch (target.result.os.tag) {
         .linux, .macos, .openbsd, .freebsd => {

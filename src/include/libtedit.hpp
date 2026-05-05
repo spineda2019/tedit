@@ -14,7 +14,7 @@ void enter_raw_mode() noexcept;
 
 unsigned char read_char() noexcept;
 
-void print_char(unsigned char) noexcept;
+void write_char(types::file_handle_t, unsigned char) noexcept;
 
 void clear_screen() noexcept;
 

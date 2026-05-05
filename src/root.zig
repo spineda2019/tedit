@@ -7,6 +7,8 @@ const platform = switch (builtin.target.os.tag) {
     else => |os| @compileError("Unsupported OS: " ++ @tagName(os)),
 };
 
+const file_handle_t = platform.file_handle_t;
+
 export fn enter_cooked_mode() void {
     platform.enterCookedMode() catch |err| {
         @panic(@errorName(err));
@@ -25,8 +27,8 @@ export fn read_char() u8 {
     };
 }
 
-export fn print_char(char: u8) void {
-    platform.print(char) catch |err| {
+export fn write_char(file: file_handle_t, char: u8) void {
+    platform.write(file, char) catch |err| {
         @panic(@errorName(err));
     };
 }
