@@ -1,18 +1,26 @@
+/// Copyright 2026 Sebastian Pineda
+/// \file meta.hpp
+/// Template metaprogramming
+///
+/// This file should be in charge of defining types computed at compile-time
+
 #ifndef SRC_INCLUDE_META_HPP_
 #define SRC_INCLUDE_META_HPP_
 
 namespace tedit::meta {
-namespace fs {
-enum class FileHandleType {
-    FileDescriptor,  // All of posix
-    Handle,          // Just Windows TBH
-};
-}
+
 struct size_type final {
     using type = decltype(sizeof(unsigned char));
     static_assert(sizeof(type) >= 2,
                   "C++11 and above mandates size_t is not less than 16 bits");
 };
+
+namespace fs {
+enum class FileHandleType {
+    FileDescriptor,  // All of posix
+    Handle,          // Just Windows TBH
+};
+}  // namespace fs
 
 template <fs::FileHandleType T>
 struct FileHandle final {

@@ -2,6 +2,7 @@
 #define SRC_INCLUDE_FILEHANDLE_HPP_
 
 #include "./CStringView.hpp"
+#include "./meta.hpp"
 
 namespace tedit {
 namespace file {

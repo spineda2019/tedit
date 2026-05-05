@@ -6,6 +6,12 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
     const optimize = b.standardOptimizeOption(.{});
     const install_step = b.getInstallStep();
 
+    const compiledb: bool = b.option(
+        bool,
+        "compiledb",
+        "Build compile_commands.json",
+    ) orelse false;
+
     const mod = b.addModule("tedit", .{
         .root_source_file = b.path("src/root.zig"),
         .target = target,
@@ -189,8 +195,10 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
             .optimize = optimize,
         }),
     });
-    const runcompiledb = b.addRunArtifact(execompiledb);
-    compile_db_step.dependOn(&runcompiledb.step);
-    runcompiledb.addFileArg(b.path(""));
-    install_step.dependOn(&runcompiledb.step);
+    if (compiledb) {
+        const runcompiledb = b.addRunArtifact(execompiledb);
+        compile_db_step.dependOn(&runcompiledb.step);
+        runcompiledb.addFileArg(b.path(""));
+        install_step.dependOn(&runcompiledb.step);
+    }
 }

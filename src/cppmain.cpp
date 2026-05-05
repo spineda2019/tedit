@@ -3,9 +3,10 @@
 #include "include/CStringView.hpp"
 #include "include/FileHandle.hpp"
 #include "include/libtedit.hpp"
-#include "include/types.hpp"
+#include "include/meta.hpp"
 
-extern "C" void cppmain(const unsigned char* const path, tedit::size_t len) {
+extern "C" void cppmain(const unsigned char* const path,
+                        tedit::types::size_t len) {
     const tedit::CStringView full_path{path, len};
     const tedit::FileHandle<tedit::file::OwningType::NonOwning> screen{
         tedit::file::SpecialFile::StdOut};
