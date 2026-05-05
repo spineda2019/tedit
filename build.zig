@@ -53,6 +53,7 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
     const cppfiles = comptime .{
         .{ "src/", "cppmain.cpp" },
         .{ "src/", "CStringView.cpp" },
+        .{ "src/", "types.cpp" },
     };
     const cppflags = comptime [_][]const u8{
         "-std=c++23",
@@ -62,6 +63,7 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
         "-Wshadow",
         "-Wconversion",
         "-Werror",
+        "-fno-exceptions",
     };
 
     inline for (cppfiles) |file| {

@@ -2,7 +2,7 @@
 #define SRC_INCLUDE_FILEHANDLE_HPP_
 
 #include "./CStringView.hpp"
-#include "./meta.hpp"
+#include "./types.hpp"
 
 namespace tedit {
 namespace file {
@@ -11,11 +11,6 @@ enum class OwningType : unsigned char {
     NonOwning,
 };
 
-enum class SpecialFile {
-    StdOut,
-    StdIn,
-    StdErr,
-};
 }  // namespace file
 
 template <file::OwningType T>
@@ -25,17 +20,17 @@ class FileHandle final {
         requires(T == file::OwningType::Owning)
     {}
 
-    explicit FileHandle(file::SpecialFile) noexcept
+    explicit FileHandle(tedit::meta::fs::SpecialFile sf) noexcept
         requires(T == file::OwningType::NonOwning)
-    {}
+        : file_handle_{types::GetSpecialFileHandle(sf)} {}
 
     void write() {
         //
-        (void)fd_;
+        (void)file_handle_;
     }
 
  private:
-    int fd_;
+    tedit::types::file_handle_t file_handle_;
 };
 
 }  // namespace tedit

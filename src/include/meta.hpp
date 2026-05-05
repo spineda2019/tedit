@@ -20,6 +20,12 @@ enum class FileHandleType {
     FileDescriptor,  // All of posix
     Handle,          // Just Windows TBH
 };
+
+enum class SpecialFile {
+    StdOut,
+    StdIn,
+    StdErr,
+};
 }  // namespace fs
 
 template <fs::FileHandleType T>

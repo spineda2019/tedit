@@ -3,8 +3,7 @@
 #ifndef SRC_INCLUDE_LIBTEDIT_HPP_
 #define SRC_INCLUDE_LIBTEDIT_HPP_
 
-#include "./macro_wrappers.hpp"
-#include "./meta.hpp"
+#include "./types.hpp"
 
 namespace tedit {
 
@@ -17,7 +16,9 @@ unsigned char read_char() noexcept;
 
 void print_char(unsigned char) noexcept;
 
-types::file_handle_t clear_screen() noexcept;
+void clear_screen() noexcept;
+
+tedit::types::file_handle_t open(const char*) noexcept;
 }
 }  // namespace tedit
 

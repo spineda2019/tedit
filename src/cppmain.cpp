@@ -3,13 +3,15 @@
 #include "include/CStringView.hpp"
 #include "include/FileHandle.hpp"
 #include "include/libtedit.hpp"
-#include "include/meta.hpp"
 
 extern "C" void cppmain(const unsigned char* const path,
                         tedit::types::size_t len) {
     const tedit::CStringView full_path{path, len};
-    const tedit::FileHandle<tedit::file::OwningType::NonOwning> screen{
-        tedit::file::SpecialFile::StdOut};
+
+    using TerminalIO = tedit::FileHandle<tedit::file::OwningType::NonOwning>;
+    const TerminalIO output{tedit::meta::fs::SpecialFile::StdOut};
+    const TerminalIO input{tedit::meta::fs::SpecialFile::StdIn};
+
     const tedit::FileHandle<tedit::file::OwningType::Owning> fod{full_path};
 
     tedit::enter_raw_mode();
