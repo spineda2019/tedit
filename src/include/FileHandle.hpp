@@ -39,6 +39,14 @@ class FileHandle final {
         return tedit::meta::reference::forward<Self>(self);
     }
 
+    /// `auto&&` here is a forwarding reference, NOT an rvalue
+    template <class Self>
+    auto&& operator>>(this Self&& self, unsigned char& letter) {
+        // DEDUCING THIS LFGGGGGGG
+        letter = tedit::read_char(self.file_handle_);
+        return tedit::meta::reference::forward<Self>(self);
+    }
+
  private:
     tedit::types::file_handle_t file_handle_;
 };

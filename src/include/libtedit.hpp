@@ -12,7 +12,7 @@ void enter_cooked_mode() noexcept;
 
 void enter_raw_mode() noexcept;
 
-unsigned char read_char() noexcept;
+unsigned char read_char(types::file_handle_t) noexcept;
 
 void write_char(types::file_handle_t, unsigned char) noexcept;
 

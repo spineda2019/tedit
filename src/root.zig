@@ -21,8 +21,8 @@ export fn enter_raw_mode() void {
     };
 }
 
-export fn read_char() u8 {
-    return platform.read() catch |err| {
+export fn read_char(file: file_handle_t) u8 {
+    return platform.read(file) catch |err| {
         @panic(@errorName(err));
     };
 }

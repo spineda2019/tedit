@@ -75,6 +75,10 @@ constexpr T&& forward(remove_reference_t<T>&& any) {
 }
 }  // namespace reference
 
+namespace signedness {
+// TODO(SEP): IsSigned meta functions
+}  // namespace signedness
+
 }  // namespace tedit::meta
 
 #endif  // SRC_INCLUDE_META_HPP_

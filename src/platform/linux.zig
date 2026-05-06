@@ -39,9 +39,9 @@ pub fn enterRawMode() Error!void {
     }
 }
 
-pub fn read() Error!u8 {
+pub fn read(file: file_handle_t) Error!u8 {
     var char = [1]u8{0};
-    if (linux.read(stdin, &char, 1) != 0) {
+    if (linux.read(file, &char, 1) != 0) {
         return char[0];
     } else {
         return Error.ReadFailure;

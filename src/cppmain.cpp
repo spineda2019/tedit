@@ -17,7 +17,7 @@ extern "C" void cppmain(const unsigned char* const path,
     tedit::enter_raw_mode();
     unsigned char ch{};
     while (ch != 'q') {
-        ch = tedit::read_char();
+        input >> ch;
         switch (ch) {
             case 'Q':
                 tedit::clear_screen();
