@@ -75,10 +75,17 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
         const full_path = b.path(full_path_str);
 
         const jsonflags = comptime [_][]const u8{ "-MJ", json_fragment_name };
-        const fullflags = cppflags ++ jsonflags;
+        const fullflags: []const []const u8 = blk: {
+            if (compiledb) {
+                break :blk &(cppflags ++ jsonflags);
+            } else {
+                break :blk &cppflags;
+            }
+        };
+
         modcpp.addCSourceFile(.{
             .file = full_path,
-            .flags = &fullflags,
+            .flags = fullflags,
             .language = .cpp,
         });
     }
