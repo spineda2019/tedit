@@ -16,13 +16,13 @@ enum class OwningType : unsigned char {
 }  // namespace file
 
 template <file::OwningType T>
-class FileHandle final {
+class File final {
  public:
-    explicit FileHandle(CStringView) noexcept
+    explicit File(CStringView) noexcept
         requires(T == file::OwningType::Owning)
     {}
 
-    explicit FileHandle(tedit::meta::fs::SpecialFile sf) noexcept
+    explicit File(tedit::meta::fs::SpecialFile sf) noexcept
         requires(T == file::OwningType::NonOwning)
         : file_handle_{types::GetSpecialFileHandle(sf)} {}
 
