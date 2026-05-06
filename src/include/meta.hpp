@@ -75,6 +75,25 @@ constexpr T&& forward(remove_reference_t<T>&& any) {
 }
 }  // namespace reference
 
+namespace cmp {
+
+/// Respects cv qualifiers, so `const int` and `int` would not be considered
+/// the same type
+template <class T, class V>
+struct IsSame final {
+    static inline constexpr bool value{false};
+};
+
+template <class TV>
+struct IsSame<TV, TV> final {
+    static inline constexpr bool value{true};
+};
+
+template <class T, class V>
+static inline constexpr bool is_same_v{IsSame<T, V>::value};
+
+}  // namespace cmp
+
 namespace signedness {
 // TODO(SEP): IsSigned meta functions
 }  // namespace signedness
