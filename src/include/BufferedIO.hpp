@@ -1,31 +1,39 @@
 #ifndef SRC_INCLUDE_BUFFEREDIO_HPP_
 #define SRC_INCLUDE_BUFFEREDIO_HPP_
 
+#include "./File.hpp"
 #include "./meta.hpp"
+#include "types.hpp"
 
 namespace tedit::io {
 template <class T>
-concept Buffer = requires(T t) {
-    t.append();
-    t.clear();
-};
+concept StackBuffer = requires(T t, types::size_t i) {
+    //
+    { t[i] } -> meta::cmp::same_type<typename T::value_type&>;
+} && T::Size() == types::values::GetPageSize();
 
-template <Buffer buffer_t, meta::fs::FileHandleType file_type>
+template <StackBuffer buffer_t, tedit::file::OwningType OT>
 class BufferedWriter {
  public:
-    constexpr explicit BufferedWriter(buffer_t&& buf,
-                                      meta::FileHandle<file_type> file)
-        : buf_{meta::reference::forward(buf)}, file_{file} {}
+    constexpr explicit BufferedWriter(buffer_t&& buf, tedit::File<OT> file)
+        : buf_{meta::reference::forward(buf)}, file_{file}, sentinel_{0} {}
 
  private:
     buffer_t buf_;
-    meta::FileHandle<file_type> file_;
+    tedit::File<OT> file_;
+    types::size_t sentinel_;
 };
 
-template <Buffer buffer_t>
+template <StackBuffer buffer_t, tedit::file::OwningType OT>
 class BufferedReader {
  public:
+    constexpr explicit BufferedReader(buffer_t&& buf, tedit::File<OT> file)
+        : buf_{meta::reference::forward(buf)}, file_{file}, sentinel_{0} {}
+
  private:
+    buffer_t buf_;
+    tedit::File<OT> file_;
+    types::size_t sentinel_;
 };
 
 }  // namespace tedit::io

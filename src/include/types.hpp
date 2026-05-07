@@ -43,6 +43,19 @@ file_handle_t GetSpecialFileHandleHelper(
 
 // defined in TU
 file_handle_t GetSpecialFileHandle(tedit::meta::fs::SpecialFile) noexcept;
+
+namespace values {
+inline consteval size_t GetPageSize() {
+    switch (meta::target_platform) {
+        case meta::platform::Os::Linux:
+        case meta::platform::Os::Windows:
+            return 4096;
+        case meta::platform::Os::Mac:
+            return 16384;
+    }
+}
+
+}  // namespace values
 }  // namespace tedit::types
 
 #endif  // SRC_INCLUDE_TYPES_HPP_

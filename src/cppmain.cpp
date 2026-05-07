@@ -1,5 +1,6 @@
 // Copyright 2026 Sebastian Pineda
 
+#include "include/BufferedIO.hpp"
 #include "include/CStringView.hpp"
 #include "include/File.hpp"
 #include "include/libtedit.hpp"

@@ -16,17 +16,25 @@ struct size_type final {
 };
 
 namespace fs {
-enum class FileHandleType {
+enum class FileHandleType : unsigned char {
     FileDescriptor,  // All of posix
     Handle,          // Just Windows TBH
 };
 
-enum class SpecialFile {
+enum class SpecialFile : unsigned char {
     StdOut,
     StdIn,
     StdErr,
 };
 }  // namespace fs
+
+namespace platform {
+enum class Os : unsigned char {
+    Linux,
+    Mac,
+    Windows,
+};
+}
 
 template <fs::FileHandleType T>
 struct FileHandle final {
@@ -92,6 +100,8 @@ struct IsSame<TV, TV> final {
 template <class T, class V>
 static inline constexpr bool is_same_v{IsSame<T, V>::value};
 
+template <class T, class V>
+concept same_type = is_same_v<T, V>;
 }  // namespace cmp
 
 namespace signedness {
