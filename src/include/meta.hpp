@@ -107,6 +107,46 @@ static inline constexpr bool is_same_v{IsSame<T, V>::value};
 
 template <class T, class V>
 concept same_type = is_same_v<T, V>;
+
+template <bool Condition, class T, class F>
+struct If final {
+    static_assert(false);
+};
+
+template <class T, class F>
+struct If<true, T, F> final {
+    using type = T;
+};
+
+template <class T, class F>
+struct If<false, T, F> final {
+    using type = F;
+};
+
+template <class Compared, class Head, class... Rest>
+struct OneOf final {
+ private:
+    static inline consteval bool Detail() {
+        if constexpr (is_same_v<Compared, Head>) {
+            return true;
+        } else {
+            return OneOf<Compared, Rest...>::value;
+        }
+    }
+
+ public:
+    static inline constexpr bool value{Detail()};
+};
+
+template <class Compared, class Last>
+struct OneOf<Compared, Last> final {
+    static inline constexpr bool value{is_same_v<Compared, Last>};
+};
+
+static_assert(OneOf<bool, bool>::value);
+static_assert(!OneOf<bool, void>::value);
+static_assert(OneOf<bool, int, char, unsigned long, bool>::value);
+
 }  // namespace cmp
 
 namespace signedness {

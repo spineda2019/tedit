@@ -6,22 +6,7 @@
 #include "types.hpp"
 
 namespace tedit::io {
-template <class T>
-concept Buffer = requires(T buf, types::size_t i) {
-    { buf[i] } -> meta::cmp::same_type<typename T::value_type&>;
-    { buf.len() } -> meta::cmp::same_type<types::size_t>;
-    { buf.c_ptr() } -> meta::cmp::same_type<typename T::value_type*>;
-};
-
-template <class T>
-concept StackBuffer = Buffer<T> && (T::Size() == types::values::GetPageSize());
-
-template <class SB>
-concept FileStackBuffer =
-    StackBuffer<SB> &&
-    meta::cmp::same_type<typename SB::value_type, unsigned char>;
-
-template <FileStackBuffer buffer_t, tedit::file::OwningType OT>
+template <types::io::FileStackBuffer buffer_t, tedit::file::OwningType OT>
 class BufferedWriter {
  public:
     constexpr explicit BufferedWriter(buffer_t&& buf, tedit::File<OT> file)
@@ -45,7 +30,7 @@ class BufferedWriter {
     types::size_t sentinel_;
 };
 
-template <FileStackBuffer buffer_t, tedit::file::OwningType OT>
+template <types::io::FileStackBuffer buffer_t, tedit::file::OwningType OT>
 class BufferedReader {
  public:
     constexpr explicit BufferedReader(buffer_t&& buf, tedit::File<OT> file)
