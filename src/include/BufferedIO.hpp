@@ -7,12 +7,21 @@
 
 namespace tedit::io {
 template <class T>
-concept StackBuffer = requires(T t, types::size_t i) {
-    //
-    { t[i] } -> meta::cmp::same_type<typename T::value_type&>;
-} && T::Size() == types::values::GetPageSize();
+concept Buffer = requires(T buf, types::size_t i) {
+    { buf[i] } -> meta::cmp::same_type<typename T::value_type&>;
+    { buf.len() } -> meta::cmp::same_type<types::size_t>;
+    { buf.c_ptr() } -> meta::cmp::same_type<typename T::value_type*>;
+};
 
-template <StackBuffer buffer_t, tedit::file::OwningType OT>
+template <class T>
+concept StackBuffer = Buffer<T> && (T::Size() == types::values::GetPageSize());
+
+template <class SB>
+concept FileStackBuffer =
+    StackBuffer<SB> &&
+    meta::cmp::same_type<typename SB::value_type, unsigned char>;
+
+template <FileStackBuffer buffer_t, tedit::file::OwningType OT>
 class BufferedWriter {
  public:
     constexpr explicit BufferedWriter(buffer_t&& buf, tedit::File<OT> file)
@@ -20,13 +29,23 @@ class BufferedWriter {
           file_{meta::reference::move(file)},
           sentinel_{0} {}
 
+    BufferedWriter& operator<<(unsigned char letter) {
+        [[unlikely]]
+        if (sentinel_ >= buf_.capacity()) {
+            file_ << buf_;
+            sentinel_ = 0;
+        }
+
+        buf_[sentinel_] = letter;
+    }
+
  private:
     buffer_t buf_;
     tedit::File<OT> file_;
     types::size_t sentinel_;
 };
 
-template <StackBuffer buffer_t, tedit::file::OwningType OT>
+template <FileStackBuffer buffer_t, tedit::file::OwningType OT>
 class BufferedReader {
  public:
     constexpr explicit BufferedReader(buffer_t&& buf, tedit::File<OT> file)
