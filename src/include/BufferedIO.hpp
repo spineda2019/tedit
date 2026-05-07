@@ -16,7 +16,9 @@ template <StackBuffer buffer_t, tedit::file::OwningType OT>
 class BufferedWriter {
  public:
     constexpr explicit BufferedWriter(buffer_t&& buf, tedit::File<OT> file)
-        : buf_{meta::reference::forward(buf)}, file_{file}, sentinel_{0} {}
+        : buf_{meta::reference::forward(buf)},
+          file_{meta::reference::move(file)},
+          sentinel_{0} {}
 
  private:
     buffer_t buf_;
@@ -28,7 +30,9 @@ template <StackBuffer buffer_t, tedit::file::OwningType OT>
 class BufferedReader {
  public:
     constexpr explicit BufferedReader(buffer_t&& buf, tedit::File<OT> file)
-        : buf_{meta::reference::forward(buf)}, file_{file}, sentinel_{0} {}
+        : buf_{meta::reference::forward(buf)},
+          file_{meta::reference::move(file)},
+          sentinel_{0} {}
 
  private:
     buffer_t buf_;

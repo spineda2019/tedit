@@ -73,13 +73,18 @@ template <class T>
 using remove_reference_t = typename RemoveReference<T>::type;
 
 template <class T>
-constexpr T&& forward(remove_reference_t<T>& any) {
+constexpr T&& forward(remove_reference_t<T>& any) noexcept {
     return static_cast<T&&>(any);
 }
 
 template <class T>
-constexpr T&& forward(remove_reference_t<T>&& any) {
+constexpr T&& forward(remove_reference_t<T>&& any) noexcept {
     return static_cast<T&&>(any);
+}
+
+template <class T>
+constexpr remove_reference_t<T>&& move(T&& t) noexcept {
+    return static_cast<remove_reference_t<T>&&>(t);
 }
 }  // namespace reference
 
