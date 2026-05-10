@@ -1,10 +1,9 @@
 #ifndef SRC_INCLUDE_FILEHANDLE_HPP_
 #define SRC_INCLUDE_FILEHANDLE_HPP_
 
+#include <libcpp/include/fs.hpp>
 #include <libcpp/meta/types.hpp>
 #include <libzig/libzig.hpp>
-
-#include "./fs.hpp"
 
 namespace libcpp {
 namespace file {
