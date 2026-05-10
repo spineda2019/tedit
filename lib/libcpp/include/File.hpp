@@ -1,8 +1,8 @@
 #ifndef SRC_INCLUDE_FILEHANDLE_HPP_
 #define SRC_INCLUDE_FILEHANDLE_HPP_
 
+#include <libcpp/meta/types.hpp>
 #include <libzig/libzig.hpp>
-#include <libzig/meta/types.hpp>
 
 #include "./fs.hpp"
 
@@ -26,17 +26,12 @@ class File final {
         requires(T == file::OwningType::NonOwning)
         : file_handle_{libzig::types::GetSpecialFileHandle(sf)} {}
 
-    void write() {
-        //
-        (void)file_handle_;
-    }
-
     /// `auto&&` here is a forwarding reference, NOT an rvalue
     template <class Self>
     auto&& operator<<(this Self&& self, unsigned char letter) {
         // DEDUCING THIS LFGGGGGGG
         libzig::write_char(self.file_handle_, letter);
-        return libzig::meta::types::reference::forward<Self>(self);
+        return libcpp::meta::types::reference::forward<Self>(self);
     }
 
     /// `auto&&` here is a forwarding reference, NOT an rvalue
@@ -44,7 +39,7 @@ class File final {
     auto&& operator>>(this Self&& self, unsigned char& letter) {
         // DEDUCING THIS LFGGGGGGG
         letter = libzig::read_char(self.file_handle_);
-        return libzig::meta::types::reference::forward<Self>(self);
+        return libcpp::meta::types::reference::forward<Self>(self);
     }
 
  private:
