@@ -1,32 +1,33 @@
 // Copyright 2026 Sebastian Pineda
 
-#include "include/BufferedIO.hpp"
-#include "include/CStringView.hpp"
-#include "include/File.hpp"
-#include "include/libtedit.hpp"
+#include <include/File.hpp>
+#include <meta/types.hpp>
 
-extern "C" void cppmain(const unsigned char* const path,
-                        tedit::types::size_t len) {
-    const tedit::CStringView full_path{path, len};
+extern "C" void cppmain(const unsigned char* const path, libzig::size_t len) {
+    // const tedit::CStringView full_path{path, len};
+    // const tedit::File<tedit::file::OwningType::Owning> fod{full_path};
+    (void)path;
+    (void)len;
 
-    using TerminalIO = tedit::File<tedit::file::OwningType::NonOwning>;
-    const TerminalIO output{tedit::meta::fs::SpecialFile::StdOut};
-    const TerminalIO input{tedit::meta::fs::SpecialFile::StdIn};
+    using OwningType = libcpp::file::OwningType;
+    using TerminalIO = libcpp::File<OwningType::NonOwning>;
+    using SpecialFile = libzig::meta::tags::fs::SpecialFile;
 
-    const tedit::File<tedit::file::OwningType::Owning> fod{full_path};
+    const TerminalIO output{SpecialFile::StdOut};
+    const TerminalIO input{SpecialFile::StdIn};
 
-    tedit::enter_raw_mode();
+    libzig::enter_raw_mode();
     unsigned char ch{};
     while (ch != 'q') {
         input >> ch;
         switch (ch) {
             case 'Q':
-                tedit::clear_screen();
+                libzig::clear_screen();
                 break;
             default:
                 output << ch;
                 break;
         }
     }
-    tedit::enter_cooked_mode();
+    libzig::enter_cooked_mode();
 }

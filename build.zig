@@ -2,6 +2,10 @@ const std = @import("std");
 const builtin = @import("builtin");
 
 pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
+    // *************************************************************************
+    // *                             Build options                             *
+    // *************************************************************************
+
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
     const install_step = b.getInstallStep();
@@ -12,50 +16,6 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
         "Build compile_commands.json",
     ) orelse false;
 
-    const mod = b.addModule("tedit", .{
-        .root_source_file = b.path("src/root.zig"),
-        .target = target,
-    });
-    const modteditexe = b.createModule(.{
-        .root_source_file = b.path("src/main.zig"),
-        .target = target,
-        .optimize = optimize,
-        // List of modules available for import in source files part of the
-        // root module.
-        .imports = &.{
-            .{ .name = "tedit", .module = mod },
-        },
-    });
-    const modcpp = b.createModule(.{
-        .target = target,
-        .optimize = optimize,
-        .link_libc = false,
-        .link_libcpp = false,
-        .strip = (optimize != .Debug),
-    });
-    switch (target.result.os.tag) {
-        .linux, .macos, .openbsd, .freebsd => {
-            modcpp.addCMacro("TEDIT_POSIX", "");
-        },
-        .windows => {
-            modcpp.addCMacro("TEDIT_WIN32", "");
-        },
-        else => |other| {
-            var init: [27]u8 = comptime .{0} ** 27;
-            @memcpy(&init, "Unsupported OS (for now?): ");
-
-            var buf: std.ArrayList(u8) = .initBuffer(&init);
-            try buf.appendSlice(b.allocator, @tagName(other));
-
-            @panic(buf.items);
-        },
-    }
-
-    const cppfiles = comptime .{
-        .{ "src/", "cppmain.cpp" },
-        .{ "src/", "CStringView.cpp" },
-        .{ "src/", "types.cpp" },
-    };
     const cppflags = comptime [_][]const u8{
         "-std=c++23",
         "-Wall",
@@ -67,7 +27,22 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
         "-fno-exceptions",
     };
 
-    inline for (cppfiles) |file| {
+    // *************************************************************************
+    // *                            Module Creation                            *
+    // *************************************************************************
+
+    // our libc "replacement"
+    const modlibzig = b.addModule("libzig", .{
+        .root_source_file = b.path("lib/libzig/root.zig"),
+        .target = target,
+        .optimize = optimize,
+        .link_libc = false,
+        .link_libcpp = false,
+    });
+
+    // currently header only, but this can change
+    const libzigfiles = comptime .{};
+    inline for (libzigfiles) |file| {
         const dir_str: []const u8, const file_name: []const u8 = file;
         const full_path_str = dir_str ++ file_name;
         const json_fragment_name = file_name ++ ".json.tmp";
@@ -83,26 +58,123 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
             }
         };
 
-        modcpp.addCSourceFile(.{
+        modlibzig.addCSourceFile(.{
             .file = full_path,
             .flags = fullflags,
             .language = .cpp,
         });
     }
 
-    const libtedit = b.addLibrary(.{
+    // our libc++ "replacement"
+    const modlibcpp = b.addModule("libcpp", .{
+        .target = target,
+        .optimize = optimize,
+        .link_libc = false,
+        .link_libcpp = false,
+    });
+    const libcppfiles = comptime .{
+        .{ "lib/libcpp/", "fs.cpp" },
+    };
+    inline for (libcppfiles) |file| {
+        const dir_str: []const u8, const file_name: []const u8 = file;
+        const full_path_str = dir_str ++ file_name;
+        const json_fragment_name = file_name ++ ".json.tmp";
+
+        const full_path = b.path(full_path_str);
+
+        const jsonflags = comptime [_][]const u8{ "-MJ", json_fragment_name };
+        const fullflags: []const []const u8 = blk: {
+            if (compiledb) {
+                break :blk &(cppflags ++ jsonflags);
+            } else {
+                break :blk &cppflags;
+            }
+        };
+
+        modlibcpp.addCSourceFile(.{
+            .file = full_path,
+            .flags = fullflags,
+            .language = .cpp,
+        });
+    }
+    modlibcpp.addIncludePath(b.path("lib/libzig/"));
+
+    const modtedit = b.createModule(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    const teditcppfiles = comptime .{
+        .{ "src/", "cppmain.cpp" },
+    };
+    inline for (teditcppfiles) |file| {
+        const dir_str: []const u8, const file_name: []const u8 = file;
+        const full_path_str = dir_str ++ file_name;
+        const json_fragment_name = file_name ++ ".json.tmp";
+
+        const full_path = b.path(full_path_str);
+
+        const jsonflags = comptime [_][]const u8{ "-MJ", json_fragment_name };
+        const fullflags: []const []const u8 = blk: {
+            if (compiledb) {
+                break :blk &(cppflags ++ jsonflags);
+            } else {
+                break :blk &cppflags;
+            }
+        };
+
+        modtedit.addCSourceFile(.{
+            .file = full_path,
+            .flags = fullflags,
+            .language = .cpp,
+        });
+    }
+    modtedit.addIncludePath(b.path("lib/libcpp/"));
+    modtedit.addIncludePath(b.path("lib/libzig/"));
+
+    const mods = [_]*std.Build.Module{ modlibzig, modlibcpp, modtedit };
+
+    switch (target.result.os.tag) {
+        .linux, .macos, .openbsd, .freebsd => {
+            for (mods) |mod| {
+                mod.addCMacro("TEDIT_POSIX", "");
+            }
+        },
+        .windows => {
+            for (mods) |mod| {
+                mod.addCMacro("TEDIT_WIN32", "");
+            }
+        },
+        else => |other| {
+            var init: [27]u8 = comptime .{0} ** 27;
+            @memcpy(&init, "Unsupported OS (for now?): ");
+
+            var buf: std.ArrayList(u8) = .initBuffer(&init);
+            try buf.appendSlice(b.allocator, @tagName(other));
+
+            @panic(buf.items);
+        },
+    }
+
+    // *************************************************************************
+    // *                           Artifact Creation                           *
+    // *************************************************************************
+
+    const libzig = b.addLibrary(.{
         .linkage = .static,
-        .root_module = mod,
-        .name = "tedit",
+        .root_module = modlibzig,
+        .name = "libzig",
     });
     const libcpp = b.addLibrary(.{
-        .name = "teditcpp",
-        .root_module = modcpp,
+        .name = "libcpp",
+        .root_module = modlibcpp,
         .linkage = .static,
     });
 
-    modteditexe.linkLibrary(libcpp);
-    modcpp.linkLibrary(libtedit);
+    modlibcpp.linkLibrary(libzig);
+
+    modtedit.linkLibrary(libzig);
+    modtedit.linkLibrary(libcpp);
 
     // Here we define an executable. An executable needs to have a root module
     // which needs to expose a `main` function. While we could add a main function
@@ -122,11 +194,11 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
     // don't need and to put everything under a single module.
     const exe = b.addExecutable(.{
         .name = "tedit",
-        .root_module = modteditexe,
+        .root_module = modtedit,
     });
 
     if (optimize != .Debug) {
-        libcpp.lto = .full;
+        exe.lto = .full;
     }
 
     // This declares intent for the executable to be installed into the
@@ -165,7 +237,7 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
     // Here `mod` needs to define a target, which is why earlier we made sure to
     // set the releative field.
     const mod_tests = b.addTest(.{
-        .root_module = mod,
+        .root_module = modtedit,
     });
 
     // A run step that will run the test executable.
@@ -205,10 +277,11 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
             .optimize = optimize,
         }),
     });
+    const runcompiledb = b.addRunArtifact(execompiledb);
+    runcompiledb.addFileArg(b.path(""));
+    compile_db_step.dependOn(&runcompiledb.step);
+
     if (compiledb) {
-        const runcompiledb = b.addRunArtifact(execompiledb);
-        compile_db_step.dependOn(&runcompiledb.step);
-        runcompiledb.addFileArg(b.path(""));
         install_step.dependOn(&runcompiledb.step);
     }
 }
