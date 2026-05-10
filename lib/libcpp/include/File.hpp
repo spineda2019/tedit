@@ -1,8 +1,8 @@
 #ifndef SRC_INCLUDE_FILEHANDLE_HPP_
 #define SRC_INCLUDE_FILEHANDLE_HPP_
 
-#include <libzig.hpp>
-#include <meta/types.hpp>
+#include <libzig/libzig.hpp>
+#include <libzig/meta/types.hpp>
 
 #include "./fs.hpp"
 

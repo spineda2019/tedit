@@ -1,7 +1,7 @@
 #ifndef SRC_INCLUDE_TYPES_HPP_
 #define SRC_INCLUDE_TYPES_HPP_
 
-#include <libzig.hpp>
+#include <libzig/libzig.hpp>
 
 #include "detail/fs.hpp"
 

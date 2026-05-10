@@ -1,9 +1,11 @@
 // Copyright 2026 Sebastian Pineda
 
-#include <include/File.hpp>
-#include <meta/types.hpp>
+#include <libcpp/include/File.hpp>
+#include <libcpp/include/io.hpp>
+#include <libzig/meta/types.hpp>
 
-extern "C" void cppmain(const unsigned char* const path, libzig::size_t len) {
+extern "C" void cppmain(const unsigned char* const path,
+                        libzig::size_t len) noexcept {
     // const tedit::CStringView full_path{path, len};
     // const tedit::File<tedit::file::OwningType::Owning> fod{full_path};
     (void)path;
@@ -16,7 +18,7 @@ extern "C" void cppmain(const unsigned char* const path, libzig::size_t len) {
     const TerminalIO output{SpecialFile::StdOut};
     const TerminalIO input{SpecialFile::StdIn};
 
-    libzig::enter_raw_mode();
+    libcpp::io::terminal::EnterRawMode();
     unsigned char ch{};
     while (ch != 'q') {
         input >> ch;
@@ -29,5 +31,5 @@ extern "C" void cppmain(const unsigned char* const path, libzig::size_t len) {
                 break;
         }
     }
-    libzig::enter_cooked_mode();
+    libcpp::io::terminal::EnterCookedMode();
 }

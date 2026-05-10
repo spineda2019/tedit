@@ -73,7 +73,7 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
         .link_libcpp = false,
     });
     const libcppfiles = comptime .{
-        .{ "lib/libcpp/", "fs.cpp" },
+        .{ "lib/libcpp/", "io.cpp" },
     };
     inline for (libcppfiles) |file| {
         const dir_str: []const u8, const file_name: []const u8 = file;
@@ -97,7 +97,7 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
             .language = .cpp,
         });
     }
-    modlibcpp.addIncludePath(b.path("lib/libzig/"));
+    modlibcpp.addIncludePath(b.path("lib/"));
 
     const modtedit = b.createModule(.{
         .root_source_file = b.path("src/main.zig"),
@@ -129,8 +129,7 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
             .language = .cpp,
         });
     }
-    modtedit.addIncludePath(b.path("lib/libcpp/"));
-    modtedit.addIncludePath(b.path("lib/libzig/"));
+    modtedit.addIncludePath(b.path("lib/"));
 
     const mods = [_]*std.Build.Module{ modlibzig, modlibcpp, modtedit };
 
@@ -173,7 +172,6 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
 
     modlibcpp.linkLibrary(libzig);
 
-    modtedit.linkLibrary(libzig);
     modtedit.linkLibrary(libcpp);
 
     // Here we define an executable. An executable needs to have a root module
