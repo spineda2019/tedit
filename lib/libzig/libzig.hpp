@@ -26,6 +26,12 @@ void write_char(file_t, unsigned char) noexcept;
 void clear_screen() noexcept;
 
 file_t open(const char*) noexcept;
+
+file_t open_stdout() noexcept;
+
+file_t open_stdin() noexcept;
+
+file_t open_stderr() noexcept;
 }  // namespace libzig
 
 }  // extern "C"

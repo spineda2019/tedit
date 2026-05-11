@@ -38,3 +38,15 @@ export fn clear_screen() void {
         @panic(@errorName(err));
     };
 }
+
+export fn open_stdin() file_handle_t {
+    return std.Io.File.stdin().handle;
+}
+
+export fn open_stdout() file_handle_t {
+    return std.Io.File.stdout().handle;
+}
+
+export fn open_stderr() file_handle_t {
+    return std.Io.File.stderr().handle;
+}

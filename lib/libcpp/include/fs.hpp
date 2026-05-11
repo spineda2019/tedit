@@ -3,13 +3,24 @@
 
 #include <libzig/libzig.hpp>
 
-#include "detail/fs.hpp"
-
 namespace libzig::types {
 
-inline file_t GetSpecialFileHandle(detail::SpecialFile sf) noexcept {
-    return libzig::types::detail::GetSpecialFileHandleHelper<
-        libzig::meta::comptime_values::platform_filehandle_type>(sf);
+using FileHandleTag = libzig::meta::tags::fs::FileHandleTag;
+using SpecialFile = libzig::meta::tags::fs::SpecialFile;
+
+/// TODO(SEP): Docs
+inline file_t GetSpecialFileHandle(SpecialFile sf) noexcept {
+    switch (sf) {
+        case SpecialFile::StdIn:
+            return libzig::open_stdin();
+            break;
+        case SpecialFile::StdOut:
+            return libzig::open_stdout();
+            break;
+        case SpecialFile::StdErr:
+            return libzig::open_stderr();
+            break;
+    }
 }
 
 }  // namespace libzig::types
