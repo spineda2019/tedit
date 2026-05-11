@@ -9,10 +9,17 @@ namespace libzig::types::detail {
 using FileHandleTag = libzig::meta::tags::fs::FileHandleTag;
 using SpecialFile = libzig::meta::tags::fs::SpecialFile;
 
-/// TODO(SEP): Docs
 template <FileHandleTag T>
-    requires(T == FileHandleTag::FileDescriptor)
-inline file_t GetSpecialFileHandleHelper(SpecialFile sf) noexcept {
+inline auto GetSpecialFileHandleHelper(SpecialFile) noexcept {
+    static_assert(false);
+}
+
+using FHT = meta::tags::fs::FileHandleTag;
+
+/// TODO(SEP): Docs
+template <>
+inline auto GetSpecialFileHandleHelper<FHT::FileDescriptor>(
+    SpecialFile sf) noexcept {
     switch (sf) {
         case SpecialFile::StdIn:
             return 0;
@@ -26,10 +33,9 @@ inline file_t GetSpecialFileHandleHelper(SpecialFile sf) noexcept {
     }
 }
 
-template <FileHandleTag T>
-    requires(T == FileHandleTag::Handle)
-inline file_t GetSpecialFileHandleHelper(SpecialFile) noexcept {
-    static_assert(false, "TODO: Windows not yet supported");
+template <>
+inline auto GetSpecialFileHandleHelper<FHT::Handle>(SpecialFile) noexcept {
+    return nullptr;
 }
 }  // namespace libzig::types::detail
 

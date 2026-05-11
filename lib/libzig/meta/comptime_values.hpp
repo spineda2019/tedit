@@ -15,12 +15,12 @@ inline static constexpr libzig::meta::tags::fs::FileHandleTag
 #endif
     };
 
-inline static constexpr libzig::meta::tags::platform::Os target_platform {
+inline static constexpr libzig::meta::tags::platform::Os target_platform{
 #ifdef TEDIT_POSIX
     // TODO(SEP): somehow detect mac
     libzig::meta::tags::platform::Os::Linux
 #elifdef TEDIT_WIN32
-    libzig::meta::tags::platform::Os::Windows;
+    libzig::meta::tags::platform::Os::Windows
 #else
 #error "Could not detect target platform"
 #endif
