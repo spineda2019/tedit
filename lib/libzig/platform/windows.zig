@@ -4,6 +4,7 @@ pub const file_handle_t = std.os.windows.HANDLE;
 
 const Error = error{
     ReadFailure,
+    WriteFailure,
 };
 
 pub fn enterCookedMode() Error!void {}
@@ -33,8 +34,22 @@ pub fn read(file: file_handle_t) Error!u8 {
 }
 
 pub fn write(file: file_handle_t, char: u8) Error!void {
-    _ = file;
-    _ = char;
+    var iosb: std.os.windows.IO_STATUS_BLOCK = undefined;
+    const result = std.os.windows.ntdll.NtWriteFile(
+        file,
+        null,
+        null,
+        null,
+        &iosb,
+        &char,
+        1,
+        null,
+        null,
+    );
+
+    if (result != .SUCCESS) {
+        return Error.WriteFailure;
+    }
 }
 
 pub fn clear_screen() Error!void {}
