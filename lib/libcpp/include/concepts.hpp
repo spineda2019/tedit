@@ -104,17 +104,35 @@ inline consteval libzig::size_t GetPageSize() {
 }  // namespace values
 namespace io {
 template <class T>
-concept Iterable = requires(T iter) {
+concept Iterator = requires(T iter, T other) {
     typename T::value_type;
     typename T::difference_type;
     typename T::reference;
     typename T::pointer;
 
-    { iter.Start() } -> libzig::meta::cmp::same_type<typename T::value_type*>;
+    { *iter } -> libzig::meta::cmp::same_type<typename T::reference>;
+    { ++iter } -> libzig::meta::cmp::same_type<T&>;
+    { iter++ } -> libzig::meta::cmp::same_type<T&>;
+    { iter == other } -> libzig::meta::cmp::same_type<bool>;
+    { iter != other } -> libzig::meta::cmp::same_type<bool>;
 };
 
 template <class T>
-concept Buffer = requires(T buf, libzig::size_t i) {
+concept Iterable =
+    Iterator<typename T::iterator> && Iterator<typename T::const_iterator> &&
+    requires(T t) {
+        { t.begin() } -> libzig::meta::cmp::same_type<typename T::iterator>;
+        {
+            t.cbegin()
+        } -> libzig::meta::cmp::same_type<typename T::const_iterator>;
+        { t.end() } -> libzig::meta::cmp::same_type<typename T::iterator>;
+        {
+            t.cend()
+        } -> libzig::meta::cmp::same_type<typename T::const_iterator>;
+    };
+
+template <class T>
+concept Buffer = Iterable<T> && requires(T buf, libzig::size_t i) {
     { buf[i] } -> libzig::meta::cmp::same_type<typename T::value_type&>;
     { buf.len() } -> libzig::meta::cmp::same_type<libzig::size_t>;
     { buf.c_ptr() } -> libzig::meta::cmp::same_type<typename T::value_type*>;
