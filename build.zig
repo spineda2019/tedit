@@ -196,7 +196,10 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
     });
 
     if (optimize != .Debug) {
-        exe.lto = .full;
+        exe.lto = switch (target.result.os.tag) {
+            .windows => .none, // zig bug? Getting link errors
+            else => .full,
+        };
     }
 
     // This declares intent for the executable to be installed into the
