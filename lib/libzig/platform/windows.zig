@@ -1,6 +1,7 @@
 const std = @import("std");
 
 pub const file_handle_t = std.os.windows.HANDLE;
+var starting_state: std.os.windows.DWORD = undefined;
 
 const Error = error{
     ReadFailure,
