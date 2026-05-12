@@ -216,10 +216,18 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
         .{
             .dest_dir = .{
                 .override = .{
-                    .custom = b.pathResolve(&.{
-                        @tagName(target.result.os.tag),
-                        @tagName(optimize),
-                    }),
+                    .custom = name: {
+                        var buf: std.ArrayList(u8) = .empty;
+                        try buf.appendSlice(b.allocator, @tagName(target.result.cpu.arch));
+                        try buf.append(b.allocator, '-');
+                        try buf.appendSlice(b.allocator, @tagName(target.result.os.tag));
+                        try buf.append(b.allocator, '-');
+                        try buf.appendSlice(b.allocator, @tagName(target.result.abi));
+                        break :name b.pathResolve(&.{
+                            buf.items,
+                            @tagName(optimize),
+                        });
+                    },
                 },
             },
         },
