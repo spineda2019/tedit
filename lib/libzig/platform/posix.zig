@@ -1,4 +1,4 @@
-//! Yeah I know BSD is a family of OSes, sue me.
+//! Apparently std.c doesn't need linking against libc?
 
 const Error = error{
     GetAttrFailed,

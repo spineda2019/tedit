@@ -3,8 +3,7 @@ const builtin = @import("builtin");
 const platform = switch (builtin.target.os.tag) {
     .linux => @import("platform/linux.zig"),
     .windows => @import("platform/windows.zig"),
-    .macos => @import("platform/macos.zig"),
-    .freebsd, .netbsd, .dragonfly, .openbsd, .serenity => @import("platform/bsd.zig"),
+    .macos, .freebsd, .netbsd, .dragonfly, .openbsd, .serenity => @import("platform/posix.zig"),
     else => |os| @compileError("Unsupported OS: " ++ @tagName(os)),
 };
 

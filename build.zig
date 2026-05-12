@@ -10,6 +10,17 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
     const optimize = b.standardOptimizeOption(.{});
     const install_step = b.getInstallStep();
 
+    const use_lto: std.zig.LtoMode = blk: {
+        if (optimize == .Debug) {
+            break :blk .none;
+        }
+
+        break :blk switch (target.result.os.tag) {
+            .macos, .windows => .none,
+            else => .full,
+        };
+    };
+
     const compiledb: bool = b.option(
         bool,
         "compiledb",
@@ -194,13 +205,7 @@ pub fn build(b: *std.Build) std.mem.Allocator.Error!void {
         .name = "tedit",
         .root_module = modtedit,
     });
-
-    if (optimize != .Debug) {
-        exe.lto = switch (target.result.os.tag) {
-            .windows => .none, // zig bug? Getting link errors
-            else => .full,
-        };
-    }
+    exe.lto = use_lto;
 
     // This declares intent for the executable to be installed into the
     // install prefix when running `zig build` (i.e. when executing the default
