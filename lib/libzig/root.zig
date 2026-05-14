@@ -7,6 +7,15 @@ const platform = switch (builtin.target.os.tag) {
     else => |os| @compileError("Unsupported OS: " ++ @tagName(os)),
 };
 
+var backing = std.heap.DebugAllocator(.{}).init;
+
+var allocator: std.mem.Allocator = switch (builtin.mode) {
+    .Debug => backing.allocator(),
+    else => std.heap.smp_allocator,
+};
+
+var threaded: ?*std.Io.Threaded = null;
+
 const file_handle_t = platform.file_handle_t;
 
 export fn enter_cooked_mode() void {
@@ -37,6 +46,34 @@ export fn clear_screen() void {
     platform.clear_screen() catch |err| {
         @panic(@errorName(err));
     };
+}
+
+fn getIoSingleton() std.Io {
+    if (threaded) |t| {
+        return t.io();
+    } else {
+        var t = allocator.create(std.Io.Threaded) catch @panic("OOM");
+        t.* = .init(allocator, .{});
+        threaded = t;
+        return t.io();
+    }
+}
+
+export fn open(path: [*:0]const u8, path_len: usize) file_handle_t {
+    const slice: []const u8 = path[0..path_len];
+    const io = getIoSingleton();
+
+    if (std.fs.path.isAbsolute(slice)) {
+        const file = std.Io.Dir.openFileAbsolute(io, slice, .{ .mode = .read_only }) catch |err| {
+            @panic(@errorName(err));
+        };
+        return file.handle;
+    } else {
+        const file = std.Io.Dir.openFileAbsolute(io, slice, .{ .mode = .read_only }) catch |err| {
+            @panic(@errorName(err));
+        };
+        return file.handle;
+    }
 }
 
 export fn open_stdin() file_handle_t {
