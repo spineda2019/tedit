@@ -1,6 +1,7 @@
 #ifndef SRC_INCLUDE_FILEHANDLE_HPP_
 #define SRC_INCLUDE_FILEHANDLE_HPP_
 
+#include <libcpp/include/StringView.hpp>
 #include <libcpp/include/fs.hpp>
 #include <libcpp/meta/types.hpp>
 #include <libzig/libzig.hpp>
@@ -17,9 +18,9 @@ enum class OwningType : unsigned char {
 template <file::OwningType T>
 class File final {
  public:
-    explicit File() noexcept
+    explicit File(StringView path) noexcept
         requires(T == file::OwningType::Owning)
-    {}
+        : file_handle_{libzig::open(path.CStr())} {}
 
     explicit File(libzig::meta::tags::fs::SpecialFile sf) noexcept
         requires(T == file::OwningType::NonOwning)
@@ -41,6 +42,7 @@ class File final {
         return libcpp::meta::types::reference::forward<Self>(self);
     }
 
+ public:  // rule of 5
  private:
     libzig::file_t file_handle_;
 };
