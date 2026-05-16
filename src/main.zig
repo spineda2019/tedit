@@ -1,5 +1,6 @@
 const std = @import("std");
 const Io = std.Io;
+const arg = @import("arg.zig");
 
 const tedit = @import("tedit");
 
@@ -9,26 +10,33 @@ const Error = error{
     BadArgCount,
 };
 
-const ProgramError = Error || std.mem.Allocator.Error || std.process.Args.ToSliceError;
+const ProgramError = Error || std.mem.Allocator.Error || std.process.Args.ToSliceError || arg.ParseError;
+
+const Options = struct {
+    version: bool,
+    help: bool,
+    path: ?[:0]const u8,
+
+    pub fn convert_bool(input: []const u8) bool {
+        return std.mem.eql(u8, "true", input);
+    }
+};
 
 pub fn main(init: std.process.Init) ProgramError!void {
     const arena = init.arena.allocator();
-    const args = try init.minimal.args.toSlice(arena);
-    var arg_list: std.ArrayList([*:0]const u8) = try .initCapacity(arena, 2);
+    const arg_slice = try init.minimal.args.toSlice(arena);
+    const args: arg.ArgumentParser(Options) = .{ .cmdline = arg_slice[1..] };
+    const options: Options = try args.parse();
 
-    for (args, 0..) |arg, idx| {
-        if (idx > 0) {
-            try arg_list.append(arena, arg.ptr);
+    std.debug.print("Opts: {}\n", .{options});
+
+    const path: [:0]const u8 = blk: {
+        if (options.path) |p| {
+            break :blk p;
+        } else {
+            break :blk &.{0};
         }
-    }
-
-    const path: [*:0]const u8 = switch (arg_list.items.len) {
-        0 => comptime "",
-        1 => arg_list.items[0],
-        else => return Error.BadArgCount,
     };
-
-    std.debug.print("Using file: {s}\n", .{path});
 
     cppmain(path);
 }
