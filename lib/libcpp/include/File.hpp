@@ -20,7 +20,7 @@ class File final {
  public:
     explicit File(StringView path) noexcept
         requires(T == file::OwningType::Owning)
-        : file_handle_{libzig::open(path.CStr())} {}
+        : file_handle_{libzig::open(path.CStr(), path.Len())} {}
 
     explicit File(libzig::meta::tags::fs::SpecialFile sf) noexcept
         requires(T == file::OwningType::NonOwning)
