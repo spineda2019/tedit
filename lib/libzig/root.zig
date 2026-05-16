@@ -36,8 +36,22 @@ export fn read_char(file: file_handle_t) u8 {
     };
 }
 
+export fn read_buf(file: file_handle_t, buf: [*:0]u8, len: usize) void {
+    const buf_slice: []u8 = buf[0..len];
+    platform.read_buf(file, buf_slice) catch |err| {
+        @panic(@errorName(err));
+    };
+}
+
 export fn write_char(file: file_handle_t, char: u8) void {
     platform.write(file, char) catch |err| {
+        @panic(@errorName(err));
+    };
+}
+
+export fn write_buf(file: file_handle_t, buf: [*:0]const u8, len: usize) void {
+    const buf_slice: []const u8 = buf[0..len];
+    platform.write_buf(file, buf_slice) catch |err| {
         @panic(@errorName(err));
     };
 }

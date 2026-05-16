@@ -22,8 +22,10 @@ void enter_cooked_mode() noexcept;
 void enter_raw_mode() noexcept;
 
 unsigned char read_char(file_t) noexcept;
+void read_buf(file_t, unsigned char const*, size_t) noexcept;
 
 void write_char(file_t, unsigned char) noexcept;
+void write_buf(file_t, unsigned char const*, size_t) noexcept;
 
 void clear_screen() noexcept;
 

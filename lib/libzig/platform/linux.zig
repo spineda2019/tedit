@@ -48,8 +48,20 @@ pub fn read(file: file_handle_t) Error!u8 {
     }
 }
 
+pub fn read_buf(file: file_handle_t, buf: []u8) Error!void {
+    if (linux.read(file, buf.ptr, buf.len) != buf.len) {
+        return Error.ReadFailure;
+    }
+}
+
 pub fn write(file: file_handle_t, char: u8) Error!void {
     if (linux.write(file, &.{char}, 1) != 1) {
+        return Error.WriteFailure;
+    }
+}
+
+pub fn write_buf(file: file_handle_t, buf: []const u8) Error!void {
+    if (linux.write(file, buf.ptr, buf.len) != buf.len) {
         return Error.WriteFailure;
     }
 }

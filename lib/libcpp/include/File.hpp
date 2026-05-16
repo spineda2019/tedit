@@ -52,6 +52,18 @@ class File final {
         return libcpp::meta::types::reference::forward<Self>(self);
     }
 
+    template <class Self>
+    void Write(this Self&& self, unsigned char const* buf,
+               libzig::size_t len) noexcept {
+        libzig::write_buf(self.file_handle_, buf, len);
+    }
+
+    template <class Self>
+    void Read(this Self&& self, unsigned char const* buf,
+              libzig::size_t len) noexcept {
+        libzig::read_buf(self.file_handle_, buf, len);
+    }
+
     /// `auto&&` here is a forwarding reference, NOT an rvalue
     template <class Self>
     auto&& operator>>(this Self&& self, unsigned char& letter) {
