@@ -4,7 +4,7 @@ const arg = @import("arg.zig");
 
 const tedit = @import("tedit");
 
-extern fn cppmain([*:0]const u8) void;
+extern fn cppmain([*:0]const u8, usize) void;
 
 const Error = error{
     BadArgCount,
@@ -28,15 +28,13 @@ pub fn main(init: std.process.Init) ProgramError!void {
     const args: arg.ArgumentParser(Options) = .{ .cmdline = arg_slice[1..] };
     const options: Options = try args.parse();
 
-    std.debug.print("Opts: {}\n", .{options});
-
     const path: [:0]const u8 = blk: {
         if (options.path) |p| {
             break :blk p;
         } else {
-            break :blk &.{0};
+            break :blk &.{};
         }
     };
 
-    cppmain(path);
+    cppmain(path.ptr, path.len);
 }

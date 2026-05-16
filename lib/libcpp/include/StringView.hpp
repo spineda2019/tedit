@@ -6,7 +6,8 @@
 namespace libcpp {
 class StringView {
  public:
-    StringView(char const* ptr, libzig::size_t len) : ptr_{ptr}, len_{len} {}
+    StringView(unsigned char const* ptr, libzig::size_t len)
+        : ptr_{ptr}, len_{len} {}
 
     template <class Self>
     auto&& CStr(this Self&& self) {
@@ -18,8 +19,14 @@ class StringView {
         return meta::types::reference::forward<Self>(self).len_;
     }
 
+    template <class Self>
+    unsigned char operator[](this Self&& self, libzig::size_t idx) {
+        return meta::types::reference::forward<Self>(self).ptr_[idx];
+    }
+
+ public:  // rule of 0
  private:
-    char const* ptr_;
+    unsigned char const* ptr_;
     [[maybe_unused]]
     libzig::size_t len_;
 };

@@ -6,10 +6,8 @@
 
 extern "C" void cppmain(const unsigned char* const path,
                         libzig::size_t len) noexcept {
-    // const tedit::CStringView full_path{path, len};
+    const libcpp::StringView full_path{path, len};
     // const tedit::File<tedit::file::OwningType::Owning> fod{full_path};
-    (void)path;
-    (void)len;
 
     using OwningType = libcpp::file::OwningType;
     using TerminalIO = libcpp::File<OwningType::NonOwning>;
@@ -17,6 +15,12 @@ extern "C" void cppmain(const unsigned char* const path,
 
     const TerminalIO output{SpecialFile::StdOut};
     const TerminalIO input{SpecialFile::StdIn};
+
+    if (full_path.Len()) {
+        output << "Got a file: " << full_path << "\n";
+    } else {
+        output << "Empty Path\n";
+    }
 
     libcpp::io::terminal::EnterRawMode();
     unsigned char ch{};

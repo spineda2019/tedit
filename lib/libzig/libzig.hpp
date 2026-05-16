@@ -25,7 +25,7 @@ void write_char(file_t, unsigned char) noexcept;
 
 void clear_screen() noexcept;
 
-file_t open(const char*, size_t) noexcept;
+file_t open(unsigned const char*, size_t) noexcept;
 
 file_t open_stdout() noexcept;
 

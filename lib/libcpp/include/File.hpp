@@ -34,6 +34,23 @@ class File final {
         return libcpp::meta::types::reference::forward<Self>(self);
     }
 
+    template <class Self>
+    auto&& operator<<(this Self&& self, char const* str) {
+        for (unsigned char letter{static_cast<unsigned char>(*str)}; letter;
+             letter = static_cast<unsigned char>(*++str)) {
+            libzig::write_char(self.file_handle_, letter);
+        }
+        return libcpp::meta::types::reference::forward<Self>(self);
+    }
+
+    template <class Self>
+    auto&& operator<<(this Self&& self, StringView view) {
+        for (libzig::size_t idx{0}; idx < view.Len(); ++idx) {
+            meta::types::reference::forward<Self>(self) << view[idx];
+        }
+        return libcpp::meta::types::reference::forward<Self>(self);
+    }
+
     /// `auto&&` here is a forwarding reference, NOT an rvalue
     template <class Self>
     auto&& operator>>(this Self&& self, unsigned char& letter) {
