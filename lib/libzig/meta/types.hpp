@@ -43,6 +43,7 @@ struct FileHandle final {
 template <>
 struct FileHandle<tags::fs::FileHandleTag::FileDescriptor> final {
     using type = int;
+    inline static constexpr type INVALID{-1};
 };
 
 template <>
@@ -50,6 +51,8 @@ struct FileHandle<tags::fs::FileHandleTag::Handle> final {
     /// Technically not "guaranteed" by MSFT, but HANDLE has literally always
     /// been void* after 16 bit DOS.
     using type = void*;
+
+    inline static constexpr type INVALID{nullptr};
 };
 }  // namespace fs
 

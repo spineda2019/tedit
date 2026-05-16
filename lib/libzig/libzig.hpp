@@ -13,6 +13,8 @@ namespace libzig {
 using size_t = typename meta::types::core::SizeT::type;
 using file_t = typename meta::types::fs::FileHandle<
     meta::comptime_values::platform_filehandle_type>::type;
+static inline constexpr file_t INVALID_FILE{meta::types::fs::FileHandle<
+    meta::comptime_values::platform_filehandle_type>::INVALID};
 static_assert(sizeof(file_t) > 1, "sizeof file_t type must be > 1");
 
 void enter_cooked_mode() noexcept;
@@ -26,6 +28,8 @@ void write_char(file_t, unsigned char) noexcept;
 void clear_screen() noexcept;
 
 file_t open(unsigned const char*, size_t) noexcept;
+
+file_t close(file_t) noexcept;
 
 file_t open_stdout() noexcept;
 

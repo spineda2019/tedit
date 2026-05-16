@@ -1,17 +1,20 @@
 #ifndef SRC_INCLUDE_BUFFEREDIO_HPP_
 #define SRC_INCLUDE_BUFFEREDIO_HPP_
 
-#include "./File.hpp"
-#include "./meta.hpp"
-#include "types.hpp"
+#include <libcpp/include/concepts.hpp>
 
-namespace tedit::io {
-template <types::io::FileStackBuffer buffer_t, tedit::file::OwningType OT>
+#include "libcpp/include/File.hpp"
+#include "libcpp/meta/types.hpp"
+#include "libzig/libzig.hpp"
+
+namespace libzig::io {
+template <libcpp::meta::concepts::io::FileStackBuffer buffer_t,
+          libcpp::file::OwningType OT>
 class BufferedWriter {
  public:
-    constexpr explicit BufferedWriter(buffer_t&& buf, tedit::File<OT> file)
-        : buf_{meta::reference::forward(buf)},
-          file_{meta::reference::move(file)},
+    constexpr explicit BufferedWriter(buffer_t&& buf, libcpp::File<OT> file)
+        : buf_{libcpp::meta::types::reference::forward<buffer_t>(buf)},
+          file_{libcpp::meta::types::reference::move<libcpp::File<OT>>(file)},
           sentinel_{0} {}
 
     BufferedWriter& operator<<(unsigned char letter) {
@@ -26,24 +29,25 @@ class BufferedWriter {
 
  private:
     buffer_t buf_;
-    tedit::File<OT> file_;
-    types::size_t sentinel_;
+    libcpp::File<OT> file_;
+    size_t sentinel_;
 };
 
-template <types::io::FileStackBuffer buffer_t, tedit::file::OwningType OT>
+template <libcpp::meta::concepts::io::FileStackBuffer buffer_t,
+          libcpp::file::OwningType OT>
 class BufferedReader {
  public:
-    constexpr explicit BufferedReader(buffer_t&& buf, tedit::File<OT> file)
-        : buf_{meta::reference::forward(buf)},
-          file_{meta::reference::move(file)},
+    constexpr explicit BufferedReader(buffer_t&& buf, libcpp::File<OT> file)
+        : buf_{libcpp::meta::types::reference::forward<buffer_t>(buf)},
+          file_{libcpp::meta::types::reference::move<libcpp::File<OT>>(file)},
           sentinel_{0} {}
 
  private:
     buffer_t buf_;
-    tedit::File<OT> file_;
-    types::size_t sentinel_;
+    libcpp::File<OT> file_;
+    size_t sentinel_;
 };
 
-}  // namespace tedit::io
+}  // namespace libzig::io
 
 #endif  // SRC_INCLUDE_BUFFEREDIO_HPP_

@@ -3,6 +3,7 @@
 
 #include <libcpp/include/StringView.hpp>
 #include <libcpp/include/fs.hpp>
+#include <libcpp/include/utility.hpp>
 #include <libcpp/meta/types.hpp>
 #include <libzig/libzig.hpp>
 
@@ -60,6 +61,59 @@ class File final {
     }
 
  public:  // rule of 5
+    ~File() noexcept {
+        if constexpr (T == file::OwningType::Owning) {
+            if (file_handle_ != libzig::INVALID_FILE) {
+                libzig::close(file_handle_);
+            }
+        }
+    }
+
+    /// Multiple ownership of the same file handle is prohibited
+    auto operator=(const File&)
+        requires(T == file::OwningType::Owning)
+    = delete;
+    File& operator=(const File& other) noexcept
+        requires(T == file::OwningType::NonOwning)
+    = default;
+
+    /// Multiple ownership of the same file handle is prohibited
+    File(const File&)
+        requires(T == file::OwningType::Owning)
+    = delete;
+    File(const File& other) noexcept
+        requires(T == file::OwningType::NonOwning)
+    = default;
+
+    File& operator=(File&& other) noexcept
+        requires(T == file::OwningType::Owning)
+    {
+        if (this != &other) {
+            if (file_handle_ != libzig::INVALID_FILE) {
+                libzig::close(file_handle_);
+            }
+
+            file_handle_ =
+                libcpp::exchange(other.file_handle_, libzig::INVALID_FILE);
+        }
+
+        return *this;
+    }
+    File& operator=(File&& other) noexcept
+        requires(T == file::OwningType::NonOwning)
+    {
+        file_handle_ = other.file_handle_;
+        return *this;
+    }
+
+    File(File&& other) noexcept
+        requires(T == file::OwningType::Owning)
+        : file_handle_{
+              libcpp::exchange(other.file_handle_, libzig::INVALID_FILE)} {}
+    File(File&& other) noexcept
+        requires(T == file::OwningType::NonOwning)
+        : file_handle_{other.file_handle_} {}
+
  private:
     libzig::file_t file_handle_;
 };
