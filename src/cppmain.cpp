@@ -1,8 +1,12 @@
 // Copyright 2026 Sebastian Pineda
 
+#include <libcpp/include/Array.hpp>
+#include <libcpp/include/BufferedIO.hpp>
 #include <libcpp/include/File.hpp>
 #include <libcpp/include/io.hpp>
 #include <libzig/meta/types.hpp>
+
+#include "libcpp/include/concepts.hpp"
 
 extern "C" void cppmain(const unsigned char* const path,
                         libzig::size_t len) noexcept {
@@ -12,12 +16,17 @@ extern "C" void cppmain(const unsigned char* const path,
     using OwningType = libcpp::file::OwningType;
     using TerminalIO = libcpp::File<OwningType::NonOwning>;
     using SpecialFile = libzig::meta::tags::fs::SpecialFile;
+    using StackBuffer =
+        libcpp::Array<unsigned char,
+                      libcpp::meta::concepts::values::GetPageSize()>;
 
-    const TerminalIO output{SpecialFile::StdOut};
+    TerminalIO output{SpecialFile::StdOut};
     const TerminalIO input{SpecialFile::StdIn};
 
     if (full_path.Len()) {
         output << "Got a file: " << full_path << "\n";
+        libzig::io::BufferedWriter{StackBuffer{}, output};
+
     } else {
         output << "Empty Path\n";
     }

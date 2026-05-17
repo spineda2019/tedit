@@ -4,6 +4,22 @@
 #include <libzig/meta/type_traits.hpp>
 
 namespace libcpp::meta::types {
+
+template <class T>
+struct IsPointer final {
+    inline static constexpr bool value{false};
+};
+
+template <class T>
+struct IsPointer<T*> final {
+    inline static constexpr bool value{true};
+};
+
+template <class T>
+struct IsPointer<T const*> final {
+    inline static constexpr bool value{true};
+};
+
 namespace numeric {
 
 template <class T>

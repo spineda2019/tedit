@@ -10,6 +10,9 @@
 namespace libcpp::meta::concepts {
 
 template <class T>
+concept Pointer = types::IsPointer<T>::value;
+
+template <class T>
 concept Integral = types::numeric::IsIntegral<T>::value;
 
 template <class T>
@@ -104,7 +107,7 @@ inline consteval libzig::size_t GetPageSize() {
 }  // namespace values
 namespace io {
 template <class T>
-concept Iterator = requires(T iter, T other) {
+concept Iterator = Pointer<T> || requires(T iter, T other) {
     typename T::value_type;
     typename T::difference_type;
     typename T::reference;
@@ -135,7 +138,6 @@ template <class T>
 concept Buffer = Iterable<T> && requires(T buf, libzig::size_t i) {
     { buf[i] } -> libzig::meta::cmp::same_type<typename T::value_type&>;
     { buf.len() } -> libzig::meta::cmp::same_type<libzig::size_t>;
-    { buf.c_ptr() } -> libzig::meta::cmp::same_type<typename T::value_type*>;
 };
 
 template <class T>

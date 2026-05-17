@@ -30,10 +30,10 @@ class BufferedWriter {
 
  public:  // rule of 5
     ~BufferedWriter() noexcept { file_.Write(buf_.begin(), sentinel_); }
-    auto operator=(const BufferedWriter&) = default;
-    BufferedWriter(const BufferedWriter&) = default;
-    auto operator=(BufferedWriter&&) = default;
-    BufferedWriter(BufferedWriter&&) = default;
+    auto operator=(const BufferedWriter&) = delete;
+    BufferedWriter(const BufferedWriter&) = delete;
+    auto operator=(BufferedWriter&&) = delete;
+    BufferedWriter(BufferedWriter&&) = delete;
 
  private:
     buffer_t buf_;
